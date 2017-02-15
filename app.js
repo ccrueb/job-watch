@@ -2,6 +2,7 @@ var request = require('request');
 var cheerio = require('cheerio');
 var nodemailer = require('nodemailer');
 var config = require("./config.json");
+var fs = require('fs');
 
 // This is the latest job that was sent
 var sentIDs = [];
@@ -12,6 +13,14 @@ var REQUEST_INTERVAL = 1000 * 60 * 30;
 var urls = ['https://jobcenter.wisc.edu/jobs/categoryBrowse/Computers/0/',
     'https://jobcenter.wisc.edu/jobs/categoryBrowse/Computers/1/'];
 
+//Email settings
+var transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: config.email_user,
+        pass: config.email_pass
+    }
+});
 
 function searchPagesForNewJobs(url) {
 
@@ -23,19 +32,20 @@ function searchPagesForNewJobs(url) {
 
 function getIdsFromHTML(err, res, html) {
     //Print error
-    if(err) {
+    if (err) {
         return console.log(err);
     }
     //Get data from every first td
     var $ = cheerio.load(html);
-    $('td:first-child').each(function() {
-        var data = $(this).text();
-        if (!isNaN(data) && sentIDs.indexOf(data) === -1) {
+    $('td:first-child').each(function () {
+        var data = $(this).text().trim();
+        
+        if (!isNaN(data) && sentIDs.indexOf(data) == -1) {
             console.log(new Date().toDateString() + ' New ID found: ' + data);
             //update sendIDS
-
+            saveId(data);
             //send email
-
+            emailJob(data);
         }
     });
 };
@@ -60,15 +70,31 @@ function emailJob(id) {
             if (error) {
                 return console.log(error);
             }
-            console.log('Message %s sent: %s', info.messageId, info.response);
+            console.log(new Date().toDateString() + ' Email sent: ' + id);
         });
     });
 };
+
+function saveId(id) {
+    
+    //Add id to array in RAM and save to txt doc
+    sentIDs.push(id);
+    fs.appendFile('savedIDs.txt', id + ' ', function (err) {
+        if(err) {
+            console.log(err)
+        }
+    });
+}
+
+function load() {
+    fs.readFile('savedIDs.txt', function(err, data) {
+        sentIDs = data.toString().split(' ');
+    }) 
+}
 
 //set interval for search
 setInterval(() => { searchPagesForNewJobs(); }, REQUEST_INTERVAL);
 
 //Run on startup
-// loadConfig();
-// loadSavedIds();
+load();
 searchPagesForNewJobs();
