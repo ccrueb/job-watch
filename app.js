@@ -22,6 +22,7 @@ var transporter = nodemailer.createTransport({
     }
 });
 
+//Requests all urls
 function searchPagesForNewJobs(url) {
 
     //Get html from each page in urls
@@ -30,6 +31,7 @@ function searchPagesForNewJobs(url) {
     }
 };
 
+//Finds all IDs from table. Ids are always found in first column
 function getIdsFromHTML(err, res, html) {
     //Print error
     if (err) {
@@ -39,7 +41,7 @@ function getIdsFromHTML(err, res, html) {
     var $ = cheerio.load(html);
     $('td:first-child').each(function () {
         var data = $(this).text().trim();
-        
+        //Check if number to ignore "job id" title field
         if (!isNaN(data) && sentIDs.indexOf(data) == -1) {
             console.log(new Date().toDateString() + ' New ID found: ' + data);
             //update sendIDS
@@ -50,6 +52,7 @@ function getIdsFromHTML(err, res, html) {
     });
 };
 
+//Requests job page and emails html
 function emailJob(id) {
     request('https://jobcenter.wisc.edu/jobs/detail/' + id, function (err, res, body) {
         if (err) {
@@ -75,6 +78,7 @@ function emailJob(id) {
     });
 };
 
+//Saves id to array and appends to file
 function saveId(id) {
     
     //Add id to array in RAM and save to txt doc
@@ -86,6 +90,7 @@ function saveId(id) {
     });
 }
 
+//loads all sent IDs from txt file
 function load() {
     fs.readFile('savedIDs.txt', function(err, data) {
         sentIDs = data.toString().split(' ');

@@ -1,0 +1,16 @@
+{
+  "name": "job-scrape",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Cal Rueb <calvin.c.rueb@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "cheerio": "^0.22.0",
+    "nodemailer": "^3.1.0",
+    "request": "^2.79.0"
+  }
+}
