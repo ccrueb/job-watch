@@ -24,7 +24,7 @@ var transporter = nodemailer.createTransport({
 
 //Requests all urls
 function searchPagesForNewJobs(url) {
-
+    console.log(new Date().toDateString() + ' Searching...');
     //Get html from each page in urls
     for (var x in urls) {
         request(urls[x], getIdsFromHTML);
